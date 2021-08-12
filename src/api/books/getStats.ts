@@ -1,7 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
-import countUniqueReadClients from "../../services/books/countUniqueReadClients"
-import countUniqueReadUsers from "../../services/books/countUniqueReadUsers"
-import countClientsByCountry from "../../services/books/countClientsByCountry"
+import getStats from "../../services/books/getStats"
 
 export const method = 'GET'
 export const url = '/books/:id/stats'
@@ -14,18 +12,7 @@ export async function handler(fastify: FastifyInstance, req: FastifyRequest, rep
         return reply.code(401).send({ message: 'ID param must be provided' })
     }
     const db = (fastify as any).pg
-    const [
-        uniqueClients, uniqueUsers, clientsByCountry
-    ] = await Promise.all([
-        countUniqueReadClients(db, id),
-        countUniqueReadUsers(db, id),
-        countClientsByCountry(db, id)
-    ])
-    const out = {
-        uniqueClients,
-        uniqueUsers,
-        clientsByCountry
-    }
+    const out:object = await getStats(db, id)
     return reply.code(200).send(out)
 }
 
